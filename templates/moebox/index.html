@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="robots" content="noindex,nofollow">
+        <meta name="ROBOTS" content="NOINDEX,NOFOLLOW">
+        <meta charset="UTF-8">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        {% load staticfiles %}
+        <link rel="stylesheet" href="{% static 'moebox/style.css' %}" type="text/css" />
+    </head>
+    <body>
+<h1>
+    Uploader
+</h1>
+
+<hr />
+<form action="{% url 'moebox:upload' %}" method="post" enctype="multipart/form-data">
+    <p>FILE {% if min_size %}Min {{ min_size }} - {% endif %}Max {{ max_size }}(*{{ max_log }}Files{% if max_all_size != None %} Total {{ max_all_size }}{% endif %})</p>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" name="submit" value="upload">
+</form>
+<hr />
+
+<div class="page">
+<a href="{% url 'moebox:page' 0 %}">[all]</a>
+{% for i in page_range %}
+<a href="{% url 'moebox:page' i %}">[{{ i }}]</a>
+{% endfor %}
+</div>
+
+<hr />
+
+<ul class="itemhead cf">
+    <li class="delbutton">D</li>
+    <li class="thumbnail">FILE</li>
+    <li class="comment">COMMENT</li>
+    <li class="size">SIZE</li>
+    <li class="date">DATE</li>
+    <li class="orgname">ORIG</li>
+</ul>
+
+<hr />
+
+{% for o in objects %}
+<ul class="item cf">
+    <li class="delbutton"><a href="{% url 'moebox:delete' o.auto_increment_id %}">D</a></li>
+    <li class="filename {%if o.secret %}secret{% endif %}"><a href="{% if o.secret %}{% url 'moebox:download' o.auto_increment_id %}{% else %}{% static 'moebox/files/' %}{{ o.auto_increment_id }}.{{ o.file_ext }}{% endif %}">{{ o.auto_increment_id }}.{{ o.file_ext }}</a></li>
+    <li class="comment">{% if o.comment %}{{ o.comment }}{% else %}&nbsp;{% endif %}</li>
+    <li class="size">{{ o.size }}</li>
+    <li class="date">{{ o.upload_date }}</li>
+    <li class="orgname">{{ o.original_filename }}</li>
+</ul>
+{% endfor %}
+</body>
+</html>

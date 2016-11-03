@@ -1,0 +1,63 @@
+body {background-color : #EFEFEF; color : #000000;}
+input,td{ font-size: 10pt;font-family:Chicago,Verdana,Arial,sans-serif,"‚l‚r ‚oƒSƒVƒbƒN"; }
+a:link,a:visited,a:active{ color : #6060FF;}
+a:hover { background-color:#EECCCC; }
+div {margin :5px;}
+.originalname { width : 10em; float : left;}
+.cf:before,.cf:after{ content:"";display:table;}
+.cf:after{ clear:both; }
+.cf { zoom:1; }
+.itemhead , .item {
+	width : 100%;
+}
+.itemhead li,.item li{
+	display:block;
+	float : left;
+}
+.delbutton{ width : 1em; }
+.thumbnail{ width : 210px; }
+.filename{ width : 210px; }
+.comment{ width : 20em; }
+.size{ width : 5em; }
+.date{ width : 14em; }
+.orgname{ width : 18em; }
+
+input,textarea{	border-top : 1px solid ; border-bottom : 1px solid ; border-left : 1px solid ; border-right : 1px solid ;font-size:10pt;background-color:#FFFFFF; }
+
+.panel img{
+  margin-left:-2em;
+  box-shadow:10px 10px 35px rgba(0,0,0,0.4);
+}
+.panel {
+  display:inline-block;
+  background:#e4e4e4;
+  margin:2em;
+  box-shadow:5px 5px 15px rgba(0,0,0,0.4),inset -1px -1px 1px  #fff;
+  padding:2em 0;
+  max-width:20em;
+}
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+ 
+body {
+  position:relative;
+}
+ 
+.panel img {
+  max-width:100%;
+  height:auto;
+}
+
+form {
+    margin-top : 10px;
+    margin-bottom : 10px;
+}
+li.secret:before {
+    font-weight: bold;
+    color: red;
+    content: "*";
+}
+

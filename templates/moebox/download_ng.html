@@ -1,0 +1,4 @@
+<p>No:{{ object.auto_increment_id }}:{{ object.original_filename }}</p>
+<p>パスワードが違います</p>
+<p><a href="{% url 'moebox:download' object.auto_increment_id %}">パスワードを再入力する</a>
+   <a href="{% url 'moebox:index' %}">トップページへ戻る</a>

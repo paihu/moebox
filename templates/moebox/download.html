@@ -1,0 +1,7 @@
+<p>No.{{ object.auto_increment_id }}:{{ object.original_filename }} をダウンロードします。</p>
+<form action="{% url 'moebox:download' object.auto_increment_id %}" method="POST">
+    {% csrf_token %}
+    ダウンロードパスワード:<input type="text" name="secret_key" id="secret_key"><br>
+    <input type="submit" value="ダウンロード">
+</form>
+
