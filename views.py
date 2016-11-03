@@ -158,7 +158,11 @@ def page(request, page_id):
             'form' : form,
             'path' : 'moebox/files/',
             'max_log' : maxLog,
-            'max_size' : size_fmt(maxSize)
+            'max_size' : size_fmt(maxSize),
+            'disp_comment' : dispComment,
+            'disp_date' : dispDate,
+            'disp_size' : dispSize,
+            'disp_orgname' : dispOrgname,
             }
     if useMaxAllSize:
         context['max_all_size'] = size_fmt(maxAllSize)

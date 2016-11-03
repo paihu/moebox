@@ -36,10 +36,18 @@
 <ul class="itemhead cf">
     <li class="delbutton">D</li>
     <li class="thumbnail">FILE</li>
+    {% if disp_comment %}
     <li class="comment">COMMENT</li>
+    {% endif %}
+    {% if disp_size %}
     <li class="size">SIZE</li>
+    {% endif %}
+    {% if disp_date %}
     <li class="date">DATE</li>
+    {% endif %}
+    {% if disp_orgname %}
     <li class="orgname">ORIG</li>
+    {% endif %}
 </ul>
 
 <hr />
@@ -48,10 +56,18 @@
 <ul class="item cf">
     <li class="delbutton"><a href="{% url 'moebox:delete' o.auto_increment_id %}">D</a></li>
     <li class="filename {%if o.secret %}secret{% endif %}"><a href="{% if o.secret %}{% url 'moebox:download' o.auto_increment_id %}{% else %}{% static 'moebox/files/' %}{{ o.auto_increment_id }}.{{ o.file_ext }}{% endif %}">{{ o.auto_increment_id }}.{{ o.file_ext }}</a></li>
+    {% if disp_comment %}
     <li class="comment">{% if o.comment %}{{ o.comment }}{% else %}&nbsp;{% endif %}</li>
+    {% endif %}
+    {% if disp_size %}
     <li class="size">{{ o.size }}</li>
+    {% endif %}
+    {% if disp_date %}
     <li class="date">{{ o.upload_date }}</li>
+    {% endif %}
+    {% if disp_orgname %}
     <li class="orgname">{{ o.original_filename }}</li>
+    {% endif %}
 </ul>
 {% endfor %}
 </body>
