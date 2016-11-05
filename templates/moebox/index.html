@@ -46,7 +46,8 @@ window.addEventListener("load",function(){
     <p>FILE {% if min_size %}Min {{ min_size }} - {% endif %}Max {{ max_size }}(*{{ max_log }}Files{% if max_all_size != None %} Total {{ max_all_size }}{% endif %})</p>
     {% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" name="submit" value="upload">
+    <input type="submit" value="upload">
+    <input type="reset" value="Cancel">
 </form>
 <hr />
 
@@ -81,7 +82,7 @@ window.addEventListener("load",function(){
 {% for o in objects %}
 <ul class="item cf">
     <li class="delbutton"><a href="{% url 'moebox:delete' o.auto_increment_id %}">D</a></li>
-    <li class="filename {%if o.secret %}secret{% endif %}"><a href="{% if o.secret %}{% url 'moebox:download' o.auto_increment_id %}{% else %}{% static 'moebox/files/' %}{{ o.auto_increment_id }}.{{ o.file_ext }}{% endif %}">{{ o.auto_increment_id }}.{{ o.file_ext }}</a></li>
+    <li class="filename {%if o.secret %}secret{% endif %}"><a href="{% if o.secret %}{% url 'moebox:download' o.auto_increment_id %}{% else %}{% static 'moebox/files/' %}{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}{% endif %}">{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}</a></li>
     {% if disp_comment %}
     <li class="comment">{% if o.comment %}{{ o.comment }}{% else %}&nbsp;{% endif %}</li>
     {% endif %}
