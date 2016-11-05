@@ -1,3 +1,3 @@
-<p>No.{{ object.auto_increment_id }}:{{ object.original_filename }} を削除しました。</p>
+<p>No.{{ object.auto_increment_id }}{% if disp_orgname %}: {{ object.original_filename }}{% endif %} を削除しました。</p>
 <p><a href="{% url 'moebox:index' %}">トップページへ戻る</a></p>
 

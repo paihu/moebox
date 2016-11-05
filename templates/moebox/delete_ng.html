@@ -1,3 +1,4 @@
+<p>No.{{ object.auto_increment_id }}{% if disp_orgname %}: {{ object.original_filename }}{% endif %}</p>
 <p>削除パスワードが違います</p>
 <p>
 <a href="{% url 'moebox:delete' object.auto_increment_id %}">削除パスワードを再入力</a>

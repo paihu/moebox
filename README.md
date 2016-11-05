@@ -3,6 +3,7 @@
 ## Install
 
 * pip install dango
+* pip install Pillow
 * django-admin startproject projectname
 * cd projectname
 * git clone https://github.com/paihu/moebox.git

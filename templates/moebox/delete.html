@@ -1,4 +1,4 @@
-<p>No.{{ object.auto_increment_id }}:{{ object.original_filename }} を削除します。</p>
+<p>No.{{ object.auto_increment_id }}{% if disp_orgname %}: {{ object.original_filename }}{% endif %} を削除します。</p>
 <form action="{% url 'moebox:delete' object.auto_increment_id %}" method="POST">
 {% csrf_token %}
     削除パスワード<input type="text" id="delete_key" name="delete_key" />
