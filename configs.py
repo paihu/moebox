@@ -20,3 +20,7 @@ dispComment = True
 dispDate = True
 dispSize = True
 dispOrgname = True
+uploadDir = "d:/mydocument/work/django-test/hello/moebox/files/"
+uploadURL = "/moebox/files/"
+thumbDir = "d:/mydocument/work/django-test/hello/moebox/thumb/"
+thumbURL = "/moebox/thumb/" 

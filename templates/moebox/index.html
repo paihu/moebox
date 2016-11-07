@@ -14,7 +14,7 @@ window.addEventListener("load",function(){
     var arr = document.getElementsByClassName("filename");
     for (var i = 0; i < arr.length; i++){
         (function(i){
-        var g = "{% static 'moebox/thumb/' %}"+arr[i].firstChild.innerText;
+            var g = "{{ thumb }}"+arr[i].firstChild.innerText;
         var req = new XMLHttpRequest;
         req.addEventListener("loadend", function(){
             if(req.status == 200){
@@ -82,7 +82,7 @@ window.addEventListener("load",function(){
 {% for o in objects %}
 <ul class="item cf">
     <li class="delbutton"><a href="{% url 'moebox:delete' o.auto_increment_id %}">D</a></li>
-    <li class="filename {%if o.secret %}secret{% endif %}"><a href="{% if o.secret %}{% url 'moebox:download' o.auto_increment_id %}{% else %}{% static 'moebox/files/' %}{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}{% endif %}">{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}</a></li>
+    <li class="filename {%if o.secret %}secret{% endif %}"><a href="{% if o.secret %}{% url 'moebox:download' o.auto_increment_id %}{% else %}{{ path }}{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}{% endif %}">{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}</a></li>
     {% if disp_comment %}
     <li class="comment">{% if o.comment %}{{ o.comment }}{% else %}&nbsp;{% endif %}</li>
     {% endif %}

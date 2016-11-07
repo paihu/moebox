@@ -7,6 +7,7 @@ import os
 import imghdr
 import math
 from PIL import Image
+
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from django.http import Http404
@@ -16,21 +17,17 @@ from .models import Uploader
 from .forms import UploadFileForm
 from .configs import *
 
-uploadDir = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), 'static/moebox/files/')
-thumbDir = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), 'static/moebox/thumb/')
 
 
-def filenameFormat(name, ext):
+def _filename_format(name, ext):
     return filePre + str(name) + "." + ext
 
 
-def deleteFile(object):
+def _delete_file(object):
     path = uploadDir
     if object.secret:
         path = os.path.join(path, object.secret_key.split('%')[1])
-    path = os.path.join(path, filenameFormat(
+    path = os.path.join(path, _filename_format(
         object.auto_increment_id, object.file_ext))
     if os.path.exists(path):
         print("delete file:" + str(object.auto_increment_id))
@@ -39,14 +36,14 @@ def deleteFile(object):
         path = os.path.join(uploadDir, object.secret_key.split('%')[1])
         if os.path.exists(path):
             os.rmdir(path)
-    tpath = os.path.join(thumbDir, filenameFormat(
+    tpath = os.path.join(thumbDir, _filename_format(
         object.auto_increment_id, object.file_ext))
     if os.path.exists(tpath):
         print("delete file:" + str(object.auto_increment_id))
         os.remove(tpath)
 
 
-def allFileSize(path):
+def _all_file_size(path):
     total = 0
     for root, dirs, files in os.walk(path):
         total += sum(os.path.getsize(os.path.join(root, name))
@@ -54,14 +51,14 @@ def allFileSize(path):
     return total
 
 
-def calcKey(salt, key):
+def _calc_key(salt, key):
     return salt + '%' + binascii.hexlify(hashlib.pbkdf2_hmac('sha256', key.encode('utf-8'), salt.encode('utf-8'), 100)).decode('utf-8')
 
 
-def createThumbnail(object):
-    spath = os.path.join(uploadDir, filenameFormat(
+def _create_thumbnail(object):
+    spath = os.path.join(uploadDir, _filename_format(
         object.auto_increment_id, object.file_ext))
-    opath = os.path.join(thumbDir, filenameFormat(
+    opath = os.path.join(thumbDir, _filename_format(
         object.auto_increment_id, object.file_ext))
     if not os.path.exists(thumbDir):
         os.mkdir(thumbDir)
@@ -78,7 +75,7 @@ def createThumbnail(object):
         resize_img.save(opath)
 
 
-def sizeFormat(b):
+def _size_format(b):
     if b < 1024:
         return '%i' % b + 'B'
     if b < 1024**2:
@@ -103,8 +100,8 @@ def delete(request, request_id):
     }
     if request.method == 'GET':
         return render(request, 'moebox/delete.html', context)
-    if object.delete_key == calcKey(object.delete_key.split('%')[0], request.POST['delete_key']):
-        deleteFile(object)
+    if object.delete_key == _calc_key(object.delete_key.split('%')[0], request.POST['delete_key']):
+        _delete_file(object)
         object.delete()
         return render(request, 'moebox/delete_ok.html', context)
     return render(request, 'moebox/delete_ng.html', context)
@@ -120,16 +117,16 @@ def download(request, request_id):
         if request.method == 'GET':
             return render(request, 'moebox/download.html', context)
         try:
-            if object.secret_key == calcKey(object.secret_key.split('%')[0], request.POST['secret_key']):
+            if object.secret_key == _calc_key(object.secret_key.split('%')[0], request.POST['secret_key']):
                 context['path'] = os.path.join('moebox/files', object.secret_key.split(
-                    '%')[1], filenameFormat(object.auto_increment_id, object.file_ext))
+                    '%')[1], _filename_format(object.auto_increment_id, object.file_ext))
                 return render(request, 'moebox/download_ok.html', context)
             return render(request, 'moebox/download_ng.html', context)
         except:
             raise Http404("Download Error")
     else:
         context['path'] = os.path.join(
-            'moebox/files', filenameFormat(object.auto_increment_id, object.file_ext))
+            'moebox/files', _filename_format(object.auto_increment_id, object.file_ext))
         return render(request, 'moebox/download_ok.html', context)
 
 
@@ -143,7 +140,7 @@ def upload(request):
     salt = str(random.getrandbits(256))
     context = {
         'original_filename': file.name,
-        'delete_key': calcKey(salt, request.POST['delete_key']),
+        'delete_key': _calc_key(salt, request.POST['delete_key']),
         'comment': request.POST['comment'],
         'file_ext': file.name.split(".")[len(file.name.split(".")) - 1],
     }
@@ -162,7 +159,7 @@ def upload(request):
     if 'secret' in request.POST:
         salt = str(random.getrandbits(256))
         context['secret'] = True
-        context['secret_key'] = calcKey(salt, request.POST['secret_key'])
+        context['secret_key'] = _calc_key(salt, request.POST['secret_key'])
     q = Uploader(**context)
     q.save()
     path = uploadDir
@@ -172,29 +169,29 @@ def upload(request):
         if q.secret:
             path = os.path.join(path, q.secret_key.split('%')[1])
             os.mkdir(path)
-        path = os.path.join(path, filenameFormat(
+        path = os.path.join(path, _filename_format(
             str(q.auto_increment_id), context['file_ext']))
         with open(path, 'wb+') as f:
             for chunk in file.chunks():
                 f.write(chunk)
         size = os.path.getsize(path)
-        q.size = sizeFormat(size)
+        q.size = _size_format(size)
         q.save()
     except Exception as e:
         print(e)
-        deleteFile(q)
+        _delete_file(q)
         q.delete()
         return render(request, 'moebox/upload_ng.html', {'object': q})
     if not q.secret:
-        createThumbnail(q)
+        _create_thumbnail(q)
 
     while Uploader.objects.count() > maxLog:
-        deleteFile(Uploader.objects.order_by('auto_increment_id')[0])
+        _delete_file(Uploader.objects.order_by('auto_increment_id')[0])
         Uploader.objects.order_by('auto_increment_id')[0].delete()
 
     if useMaxAllSize:
-        while allFileSize(uploadDir) > maxAllSize:
-            deleteFile(Uploader.objects.order_by('auto_increment_id')[0])
+        while _all_file_size(uploadDir) > maxAllSize:
+            _delete_file(Uploader.objects.order_by('auto_increment_id')[0])
             Uploader.objects.order_by('auto_increment_id')[0].delete()
 
     return render(request, 'moebox/upload_ok.html', {'object': q})
@@ -220,10 +217,10 @@ def page(request, page_id):
         'page_range': range(1, page_num + 1),
         'objects': objects,
         'form': form,
-        'path': 'moebox/files/',
-        'thumb': 'moebox/thumb/',
+        'path': uploadURL,
+        'thumb': thumbURL,
         'max_log': maxLog,
-        'max_size': sizeFormat(maxSize),
+        'max_size': _size_format(maxSize),
         'disp_comment': dispComment,
         'disp_date': dispDate,
         'disp_size': dispSize,
@@ -231,8 +228,8 @@ def page(request, page_id):
         'file_prefix': filePre,
     }
     if useMaxAllSize:
-        context['max_all_size'] = sizeFormat(maxAllSize)
+        context['max_all_size'] = _size_format(maxAllSize)
     if useMinSize:
-        context['min_size'] = sizeFormat(minSize)
+        context['min_size'] = _size_format(minSize)
 
     return render(request, 'moebox/index.html', context)
