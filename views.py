@@ -77,6 +77,7 @@ def _create_thumbnail(object):
                 (math.floor(w * settings.THUMB_WIDTH / h), settings.THUMB_WIDTH))
 
         resize_img.save(opath)
+        return True
 
 
 def _size_format(b):
@@ -187,7 +188,8 @@ def upload(request):
         q.delete()
         return render(request, 'moebox/upload_ng.html', {'object': q})
     if not q.secret:
-        _create_thumbnail(q)
+        q.thumbnail = _create_thumbnail(q)
+        q.save()
 
     while Uploader.objects.count() > settings.MAX_LOG:
         _delete_file(Uploader.objects.order_by('auto_increment_id')[0])

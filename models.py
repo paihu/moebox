@@ -13,6 +13,7 @@ class Uploader(models.Model):
     comment = models.CharField(max_length=1024, null=True)
     upload_date = models.DateTimeField(auto_now=True)
     size = models.CharField(max_length=8)
+    thumbnail = models.BooleanField(blank=True,default=False)
 
     def __str__(self):
         return str(self.auto_increment_id)
