@@ -8,6 +8,7 @@ import imghdr
 import math
 from pgmagick import Image, FilterTypes
 
+from django.apps import apps
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from django.http import Http404
@@ -16,19 +17,14 @@ from django.template import loader
 from .models import Uploader
 from .forms import UploadFileForm
 
-from django.conf import settings
-
-try:
-    settings.FILE_PRE
-except:
-     from . import config as settings
+settings = apps.get_app_config('moebox')
 
 def _filename_format(name, ext):
-    return settings.FILE_PRE + str(name) + "." + ext
+    return settings.file_pre + str(name) + "." + ext
 
 
 def _delete_file(object):
-    path = settings.SRC_DIR
+    path = settings.src_dir
     if object.secret:
         path = os.path.join(path, object.secret_key.split('%')[1])
     path = os.path.join(path, _filename_format(
@@ -37,10 +33,10 @@ def _delete_file(object):
         print("delete file:" + str(object.auto_increment_id))
         os.remove(path)
     if object.secret:
-        path = os.path.join(settings.SRC_DIR, object.secret_key.split('%')[1])
+        path = os.path.join(settings.src_dir, object.secret_key.split('%')[1])
         if os.path.exists(path):
             os.rmdir(path)
-    tpath = os.path.join(settings.THUMB_DIR, _filename_format(
+    tpath = os.path.join(settings.thumb_dir, _filename_format(
         object.auto_increment_id, object.file_ext))
     if os.path.exists(tpath):
         print("delete file:" + str(object.auto_increment_id))
@@ -60,23 +56,23 @@ def _calc_key(salt, key):
 
 
 def _create_thumbnail(object):
-    spath = os.path.join(settings.SRC_DIR, _filename_format(
+    spath = os.path.join(settings.src_dir, _filename_format(
         object.auto_increment_id, object.file_ext))
-    opath = os.path.join(settings.THUMB_DIR, _filename_format(
+    opath = os.path.join(settings.thumb_dir, _filename_format(
         object.auto_increment_id, object.file_ext))
-    if not os.path.exists(settings.THUMB_DIR):
-        os.mkdir(settings.THUMB_DIR)
+    if not os.path.exists(settings.thumb_dir):
+        os.mkdir(settings.thumb_dir)
     if os.path.exists(spath) and imghdr.what(spath):
         image = Image(spath)
         if image.columns() > image.rows():
-            scale = math.floor(100 * settings.THUMB_WIDTH / image.columns())
+            scale = math.floor(100 * settings.thumb_width / image.columns())
         else:
-            scale = math.floor(100 * settings.THUMB_WIDTH / image.rows())
+            scale = math.floor(100 * settings.thumb_width / image.rows())
 
         image.scale(str(scale)+"%")
         image.write(opath)
         return True
-
+    return False
 
 def _size_format(b):
     if b < 1024:
@@ -99,7 +95,7 @@ def delete(request, request_id):
     object = get_object_or_404(Uploader, auto_increment_id=request_id)
     context = {
         'object': copy.copy(object),
-        'disp_orgname': settings.DISP_ORGNAME,
+        'disp_orgname': settings.disp_orgname,
     }
     if request.method == 'GET':
         return render(request, 'moebox/delete.html', context)
@@ -114,7 +110,7 @@ def download(request, request_id):
     object = get_object_or_404(Uploader, auto_increment_id=request_id)
     context = {
         'object': object,
-        'disp_orgname': settings.DISP_ORGNAME,
+        'disp_orgname': settings.disp_orgname,
     }
     if object.secret:
         if request.method == 'GET':
@@ -147,17 +143,17 @@ def upload(request):
         'comment': request.POST['comment'],
         'file_ext': file.name.split(".")[len(file.name.split(".")) - 1],
     }
-    if context['file_ext'] in settings.DENY_EXT.split(','):
+    if context['file_ext'] in settings.deny_ext.split(','):
         return HttpResponse("the file is not upload: %s" % file.name,status=400)
-    if not context['file_ext'] in settings.UP_EXT.split(','):
-        if not settings.UP_ALL:
+    if not context['file_ext'] in settings.up_ext.split(','):
+        if not settings.up_all:
             return HttpResponse("the file is not upload: %s" % file.name,status=400)
-        if not settings.EXT_ORG:
-            context['file_ext'] = settings.EXT_ALL
-    if settings.MIN_FLAG and settings.MIN_SIZE > file.size:
-        return HttpResponse("size too small: %d>%d" % (settings.MIN_SIZE,file.size),status=400)
-    if settings.MAX_SIZE < file.size:
-        return HttpResponse("size too big: %d<%d" % (settings.MAX_SIZE,file).size,status=400)
+        if not settings.ext_org:
+            context['file_ext'] = settings.ext_all
+    if settings.min_flag and settings.min_size > file.size:
+        return HttpResponse("size too small: %d>%d" % (settings.min_size,file.size),status=400)
+    if settings.max_size < file.size:
+        return HttpResponse("size too big: %d<%d" % (settings.max_size,file).size,status=400)
 
     if 'secret' in request.POST:
         salt = str(random.getrandbits(256))
@@ -165,7 +161,7 @@ def upload(request):
         context['secret_key'] = _calc_key(salt, request.POST['secret_key'])
     q = Uploader(**context)
     q.save()
-    path = settings.SRC_DIR
+    path = settings.src_dir
     try:
         if not os.path.exists(path):
             os.mkdir(path)
@@ -189,12 +185,12 @@ def upload(request):
         q.thumbnail = _create_thumbnail(q)
         q.save()
 
-    while Uploader.objects.count() > settings.MAX_LOG:
+    while Uploader.objects.count() > settings.max_log:
         _delete_file(Uploader.objects.order_by('auto_increment_id')[0])
         Uploader.objects.order_by('auto_increment_id')[0].delete()
 
-    if settings.MAX_ALL_FLAG:
-        while _all_file_size(settings.SRC_DIR) > settings.MAX_ALL_SIZE:
+    if settings.max_all_flag:
+        while _all_file_size(settings.src_dir) > settings.max_all_size:
             _delete_file(Uploader.objects.order_by('auto_increment_id')[0])
             Uploader.objects.order_by('auto_increment_id')[0].delete()
 
@@ -203,8 +199,8 @@ def upload(request):
 
 def page(request, page_id):
     page_id = int(page_id or "1")
-    page_num = Uploader.objects.count() // settings.PAGE_LOG
-    if Uploader.objects.count() % settings.PAGE_LOG > 0:
+    page_num = Uploader.objects.count() // settings.page_log
+    if Uploader.objects.count() % settings.page_log > 0:
         page_num += 1
 
     if int(page_id) > max(1, page_num):
@@ -214,26 +210,26 @@ def page(request, page_id):
         objects = Uploader.objects.order_by('-auto_increment_id')
     else:
         objects = Uploader.objects.order_by(
-            '-auto_increment_id')[settings.PAGE_LOG * (page_id - 1):settings.PAGE_LOG * page_id]
+            '-auto_increment_id')[settings.page_log * (page_id - 1):settings.page_log * page_id]
 
     form = UploadFileForm()
     context = {
         'page_range': range(1, page_num + 1),
         'objects': objects,
         'form': form,
-        'path': settings.HTTP_SRC_PATH,
-        'thumb': settings.HTTP_THUMB_DIR,
-        'max_log': settings.MAX_LOG,
-        'max_size': _size_format(settings.MAX_SIZE),
-        'disp_comment': settings.DISP_COMMENT,
-        'disp_date': settings.DISP_DATE,
-        'disp_size': settings.DISP_SIZE,
-        'disp_orgname': settings.DISP_ORGNAME,
-        'file_prefix': settings.FILE_PRE,
+        'path': settings.http_src_path,
+        'thumb': settings.http_thumb_dir,
+        'max_log': settings.max_log,
+        'max_size': _size_format(settings.max_size),
+        'disp_comment': settings.disp_comment,
+        'disp_date': settings.disp_date,
+        'disp_size': settings.disp_size,
+        'disp_orgname': settings.disp_orgname,
+        'file_prefix': settings.file_pre,
     }
-    if settings.MAX_ALL_FLAG:
-        context['max_all_size'] = _size_format(settings.MAX_ALL_SIZE)
-    if settings.MIN_FLAG:
-        context['min_size'] = _size_format(settings.MIN_SIZE)
+    if settings.max_all_flag:
+        context['max_all_size'] = _size_format(settings.max_all_size)
+    if settings.min_flag:
+        context['min_size'] = _size_format(settings.min_size)
 
     return render(request, 'moebox/index.html', context)

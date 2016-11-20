@@ -1,6 +1,5 @@
 __pycache__
 migrations/*
 *.un~
-static/moebox/files/*
-static/moebox/thumb/*
-dist/*
+files/*
+thumb/*
