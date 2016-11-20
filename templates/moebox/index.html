@@ -82,9 +82,9 @@ window.addEventListener("load",function(){
 {% for o in objects %}
 <ul class="item cf">
     <li class="delbutton"><a href="{% url 'moebox:delete' o.auto_increment_id %}">D</a></li>
-    {% if thumbnail %}
+    {% if o.thumbnail %}
     <li class="filename thumbnail"><a href="{{ path }}{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}">
-            <img src="" alt="{{ thumb }}{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}" />
+            <img src="{{ thumb }}{{ file_prefix }}{{ o.auto_increment_id }}.{{ o.file_ext }}" alt="thumbnail {{ file_prefix}}{{ o.auto_increment_id }}.{{ o.file_ext }}" />
     </a></li>
 
     {% else %}

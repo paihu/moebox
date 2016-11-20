@@ -6,7 +6,7 @@ import sys
 import os
 import imghdr
 import math
-from PIL import Image
+from pgmagick import Image, FilterTypes
 
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
@@ -67,16 +67,14 @@ def _create_thumbnail(object):
     if not os.path.exists(settings.THUMB_DIR):
         os.mkdir(settings.THUMB_DIR)
     if os.path.exists(spath) and imghdr.what(spath):
-        image = Image.open(spath)
-        w, h = image.size
-        if w > h:
-            resize_img = image.resize(
-                (settings.THUMB_WIDTH, math.floor(h * settings.THUMB_WIDTH / w)))
+        image = Image(spath)
+        if image.columns() > image.rows():
+            scale = math.floor(100 * settings.THUMB_WIDTH / image.columns())
         else:
-            resize_img = image.resize(
-                (math.floor(w * settings.THUMB_WIDTH / h), settings.THUMB_WIDTH))
+            scale = math.floor(100 * settings.THUMB_WIDTH / image.rows())
 
-        resize_img.save(opath)
+        image.scale(str(scale)+"%")
+        image.write(opath)
         return True
 
 
