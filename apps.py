@@ -37,3 +37,5 @@ class MoeboxConfig(AppConfig):
 
     thumb_dir = "d:/mydocument/work/django-test/hello/moebox/thumb/"
     http_thumb_dir = "/moebox/thumb/" 
+
+    use_modal = True

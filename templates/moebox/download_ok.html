@@ -1,3 +1,3 @@
 {% load static %}
-<p><a href="{% static path %}">No.{{ object.auto_increment_id }}{% if disp_orgname %}: {{ object.original_filename }}{% endif %} </a>をダウンロード</p>
+<p><a href="{{ path }}">No.{{ object.auto_increment_id }}{% if disp_orgname %}: {{ object.original_filename }}{% endif %} </a>をダウンロード</p>
 <p><a href="{% url 'moebox:index' %}">トップページへ戻る</a>

@@ -1,23 +1,23 @@
+import binascii
 import copy
 import hashlib
-import random
-import binascii
-import sys
-import os
 import imghdr
 import math
+import os
+import random
+import sys
 from pgmagick import Image, FilterTypes
 
-from django.apps import apps
-from django.shortcuts import get_object_or_404, render
+from django.apps import apps as moebox_apps
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.http import Http404
-from django.template import loader
+from django.shortcuts import get_object_or_404, render
 
-from .models import Uploader
 from .forms import UploadFileForm
+from .models import Uploader
 
-settings = apps.get_app_config('moebox')
+settings = moebox_apps.get_app_config('moebox')
 
 def _filename_format(name, ext):
     return settings.file_pre + str(name) + "." + ext
@@ -117,7 +117,7 @@ def download(request, request_id):
             return render(request, 'moebox/download.html', context)
         try:
             if object.secret_key == _calc_key(object.secret_key.split('%')[0], request.POST['secret_key']):
-                context['path'] = os.path.join('moebox/files', object.secret_key.split(
+                context['path'] = os.path.join(settings.http_src_path, object.secret_key.split(
                     '%')[1], _filename_format(object.auto_increment_id, object.file_ext))
                 return render(request, 'moebox/download_ok.html', context)
             return render(request, 'moebox/download_ng.html', context)
@@ -173,8 +173,7 @@ def upload(request):
         with open(path, 'wb+') as f:
             for chunk in file.chunks():
                 f.write(chunk)
-        size = os.path.getsize(path)
-        q.size = _size_format(size)
+        q.size = os.path.getsize(path)
         q.save()
     except Exception as e:
         print(e)
@@ -226,6 +225,8 @@ def page(request, page_id):
         'disp_size': settings.disp_size,
         'disp_orgname': settings.disp_orgname,
         'file_prefix': settings.file_pre,
+        'use_modal': settings.use_modal,
+        'all_file_size': _size_format(Uploader.objects.all().aggregate(Sum('size'))['size__sum']),
     }
     if settings.max_all_flag:
         context['max_all_size'] = _size_format(settings.max_all_size)

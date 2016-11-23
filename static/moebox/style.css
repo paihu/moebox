@@ -1,9 +1,9 @@
-body {background-color : #EFEFEF; color : #000000;}
-input,td{ font-size: 10pt;font-family:Chicago,Verdana,Arial,sans-serif,"‚l‚r ‚oƒSƒVƒbƒN"; }
+body {background-color : #EFEFEF; color : #000000; margin : 1em;}
+input,td{ font-size: 10pt;font-family:Chicago,Verdana,Arial,sans-serif; }
 a:link,a:visited,a:active{ color : #6060FF;}
 a:hover { background-color:#EECCCC; }
 div {margin :5px;}
-.originalname { width : 10em; float : left;}
+.originalname { max-width : 20em; float : left;}
 .cf:before,.cf:after{ content:"";display:table;}
 .cf:after{ clear:both; }
 .cf { zoom:1; }
@@ -11,8 +11,8 @@ div {margin :5px;}
 	width : 100%;
 }
 .itemhead li,.item li{
-	display:block;
-	float : left;
+	display:inline-block;
+    vertical-align: middle;
 }
 .delbutton{ width : 1em; }
 .thumbnail{ width : 210px; }
@@ -49,6 +49,7 @@ body {
 .panel img {
   max-width:100%;
   height:auto;
+  vertical-align: middle;
 }
 
 form {
@@ -60,4 +61,34 @@ li.secret:before {
     color: red;
     content: "*";
 }
+
+#modal {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    position: fixed;
+}
+#modal-overlay {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background: rgba(0,0,0,0.5);
+    z-index: 2;
+}
+#modal-overlay #modal-content {
+    position: fixed;
+    display: block;
+    margin: auto;
+    top: 100px;
+    left: 100px;
+    padding: 10px;
+    background: #FFF;
+    z-index: 1;
+}
+
+
 

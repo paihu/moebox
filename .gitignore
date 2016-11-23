@@ -1,5 +1,4 @@
 __pycache__
-migrations/*
 *.un~
 files/*
 thumb/*
