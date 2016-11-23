@@ -4,17 +4,16 @@ from django.apps import AppConfig
 class MoeboxConfig(AppConfig):
     name = 'moebox'
     max_log = 300
-    max_size = 5000*1024*1024
+    max_size = 5000 * 1024 * 1024
     min_flag = True
-    min_size = 100*1024
+    min_size = 100 * 1024
     max_all_flag = True
-    max_all_size = 5000*24*1024*1024
+    max_all_size = 5000 * 24 * 1024 * 1024
     file_pre = 'moebox'
     page_log = 20
     thumb_flag = True
     thumb_width = 200
     char_delname = 'D'
-
 
     title = 'Uploader'
     up_ext = 'txt,lzh,zip,rar,mp3,avi,mp4,jpg,gif,png'
@@ -36,6 +35,6 @@ class MoeboxConfig(AppConfig):
     http_src_path = "/moebox/files/"
 
     thumb_dir = "d:/mydocument/work/django-test/hello/moebox/thumb/"
-    http_thumb_dir = "/moebox/thumb/" 
+    http_thumb_dir = "/moebox/thumb/"
 
     use_modal = True

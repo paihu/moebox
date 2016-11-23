@@ -19,11 +19,20 @@ from .models import Uploader
 
 settings = moebox_apps.get_app_config('moebox')
 
-def _filename_format(name, ext):
-    return settings.file_pre + str(name) + "." + ext
+
+def _filename_format(num, ext):
+    '''
+    generate filename from ID number and file ext.
+    use prefix from app config file_pre
+    '''
+    return settings.file_pre + str(num) + "." + ext
 
 
 def _delete_file(object):
+    '''
+    delete file from Uploader Object.
+    delete file in config src_dir and thumb_dir.
+    '''
     path = settings.src_dir
     if object.secret:
         path = os.path.join(path, object.secret_key.split('%')[1])
@@ -44,6 +53,10 @@ def _delete_file(object):
 
 
 def _all_file_size(path):
+    '''
+    return all file size from path
+    if path has subdirectory, then recursive.
+    '''
     total = 0
     for root, dirs, files in os.walk(path):
         total += sum(os.path.getsize(os.path.join(root, name))
@@ -52,10 +65,18 @@ def _all_file_size(path):
 
 
 def _calc_key(salt, key):
+    '''
+    calc key from salt and passphrase
+    and return salt%key
+    '''
     return salt + '%' + binascii.hexlify(hashlib.pbkdf2_hmac('sha256', key.encode('utf-8'), salt.encode('utf-8'), 100)).decode('utf-8')
 
 
 def _create_thumbnail(object):
+    '''
+    create thumbnail file from Uploader Object.
+    create file in config thumb_dir from src_dir.
+    '''
     spath = os.path.join(settings.src_dir, _filename_format(
         object.auto_increment_id, object.file_ext))
     opath = os.path.join(settings.thumb_dir, _filename_format(
@@ -69,12 +90,17 @@ def _create_thumbnail(object):
         else:
             scale = math.floor(100 * settings.thumb_width / image.rows())
 
-        image.scale(str(scale)+"%")
+        image.scale(str(scale) + "%")
         image.write(opath)
         return True
     return False
 
+
 def _size_format(b):
+    '''
+    return size format string from int.
+    such B,KB,MB... 
+    '''
     if b < 1024:
         return '%i' % b + 'B'
     if b < 1024**2:
@@ -88,10 +114,16 @@ def _size_format(b):
 
 
 def index(request):
+    '''
+    alias page(request,1)
+    '''
     return page(request, 1)
 
 
 def delete(request, request_id):
+    '''
+    delete page use ID
+    '''
     object = get_object_or_404(Uploader, auto_increment_id=request_id)
     context = {
         'object': copy.copy(object),
@@ -107,6 +139,9 @@ def delete(request, request_id):
 
 
 def download(request, request_id):
+    '''
+    download page from ID
+    '''
     object = get_object_or_404(Uploader, auto_increment_id=request_id)
     context = {
         'object': object,
@@ -130,11 +165,14 @@ def download(request, request_id):
 
 
 def upload(request):
+    '''
+    upload page from ID
+    '''
     if not request.method == 'POST':
         raise Http404("Page Not Found.")
     form = UploadFileForm(request.POST, request.FILES)
     if not form.is_valid():
-        return HttpResponse("Invalid data: %s" % form,status=400)
+        return HttpResponse("Invalid data: %s" % form, status=400)
     file = request.FILES['uploadfile']
     salt = str(random.getrandbits(256))
     context = {
@@ -144,16 +182,16 @@ def upload(request):
         'file_ext': file.name.split(".")[len(file.name.split(".")) - 1],
     }
     if context['file_ext'] in settings.deny_ext.split(','):
-        return HttpResponse("the file is not upload: %s" % file.name,status=400)
+        return HttpResponse("the file is not upload: %s" % file.name, status=400)
     if not context['file_ext'] in settings.up_ext.split(','):
         if not settings.up_all:
-            return HttpResponse("the file is not upload: %s" % file.name,status=400)
+            return HttpResponse("the file is not upload: %s" % file.name, status=400)
         if not settings.ext_org:
             context['file_ext'] = settings.ext_all
     if settings.min_flag and settings.min_size > file.size:
-        return HttpResponse("size too small: %d>%d" % (settings.min_size,file.size),status=400)
+        return HttpResponse("size too small: %d>%d" % (settings.min_size, file.size), status=400)
     if settings.max_size < file.size:
-        return HttpResponse("size too big: %d<%d" % (settings.max_size,file).size,status=400)
+        return HttpResponse("size too big: %d<%d" % (settings.max_size, file).size, status=400)
 
     if 'secret' in request.POST:
         salt = str(random.getrandbits(256))
@@ -197,6 +235,9 @@ def upload(request):
 
 
 def page(request, page_id):
+    '''
+    list page from page number
+    '''
     page_id = int(page_id or "1")
     page_num = Uploader.objects.count() // settings.page_log
     if Uploader.objects.count() % settings.page_log > 0:
