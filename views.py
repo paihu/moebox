@@ -9,6 +9,7 @@ import sys
 from pgmagick import Image, FilterTypes
 
 from django.apps import apps as moebox_apps
+from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.http import Http404
@@ -117,7 +118,7 @@ def index(request):
     '''
     alias page(request,1)
     '''
-    return page(request, 1)
+    return page(request)
 
 
 def delete(request, request_id):
@@ -234,27 +235,23 @@ def upload(request):
     return render(request, 'moebox/upload_ok.html', {'object': q})
 
 
-def page(request, page_id):
+def page(request):
     '''
     list page from page number
     '''
-    page_id = int(page_id or "1")
-    page_num = Uploader.objects.count() // settings.page_log
-    if Uploader.objects.count() % settings.page_log > 0:
-        page_num += 1
-
-    if int(page_id) > max(1, page_num):
-        raise Http404("Page not found.")
-
-    if page_id == 0:
-        objects = Uploader.objects.order_by('-auto_increment_id')
-    else:
-        objects = Uploader.objects.order_by(
-            '-auto_increment_id')[settings.page_log * (page_id - 1):settings.page_log * page_id]
+    uploader = Uploader.objects.order_by('-auto_increment_id')
+    paginator = Paginator(uploader,settings.page_log)
+    page = request.GET.get('page')
+    try:
+        objects = paginator.page(page)
+    except PageNotAnInteger:
+        objects = paginator.page(1)
+    except EmptyPage:
+        objects = paginator.page(paginator.num_pages)
 
     form = UploadFileForm()
     context = {
-        'page_range': range(1, page_num + 1),
+        'page_range': paginator.page_range,
         'objects': objects,
         'form': form,
         'path': settings.http_src_path,

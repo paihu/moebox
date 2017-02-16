@@ -29,9 +29,8 @@
 <hr />
 
 <div class="page">
-<a href="{% url 'moebox:page' 0 %}">[all]</a>
 {% for i in page_range %}
-<a href="{% url 'moebox:page' i %}">[{{ i }}]</a>
+<a href="{% url 'moebox:page' %}?page={{ i }}">[{{ i }}]</a>
 {% endfor %}
 </div>
 
