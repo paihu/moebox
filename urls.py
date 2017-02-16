@@ -9,6 +9,6 @@ urlpatterns = [
         views.delete, name='delete'),
     url(r'^content/(?P<request_id>\d+)/download$',
         views.download, name='download'),
-    url(r'^page/$', views.page, name='page'),
+    url(r'^list/$', views.page, name='page'),
     url(r'^upload$', views.upload, name='upload'),
 ]

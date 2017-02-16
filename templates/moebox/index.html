@@ -29,9 +29,19 @@
 <hr />
 
 <div class="page">
+	{% if objects.has_previous %}
+	<a href="{% url 'moebox:page' %}?page={{ objects.previous_page_number }}">&lt;</a>
+	{% else %}
+	&lt;
+	{% endif %}
 {% for i in page_range %}
 <a href="{% url 'moebox:page' %}?page={{ i }}">[{{ i }}]</a>
 {% endfor %}
+	{% if objects.has_next %}
+	<a href="{% url 'moebox:page' %}?page={{ objects.next_page_number }}">&gt;</a>
+	{% else %}
+	&gt;
+	{% endif %}
 </div>
 
 <hr />
